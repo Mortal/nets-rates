@@ -1,47 +1,16 @@
-import os
 import json
-import inspect
 import datetime
-import functools
 
 import html5lib
 import requests
 
-
-def json_cache(cache_filename, tmp_filename, key):
-    try:
-        with open(cache_filename) as fp:
-            cache = json.load(fp)
-    except FileNotFoundError:
-        cache = {}
-
-    def decorator(fn):
-        signature = inspect.signature(fn)
-
-        @functools.wraps(fn)
-        def wrapped(*args, **kwargs):
-            bound_args = signature.bind(*args, **kwargs)
-            bound_args.apply_defaults()
-            cache_key = {k: bound_args.arguments[k] for k in key}
-            cache_key_str = json.dumps(cache_key, sort_keys=True)
-            try:
-                return cache[cache_key_str]
-            except KeyError:
-                cache[cache_key_str] = fn(*args, **kwargs)
-                with open(tmp_filename, 'w') as fp:
-                    json.dump(cache, fp, indent=2)
-                os.rename(tmp_filename, cache_filename)
-                return cache[cache_key_str]
-
-        return wrapped
-
-    return decorator
+from caching import cache
 
 
 NS = dict(h='http://www.w3.org/1999/xhtml')
 
 
-@json_cache('http-cache.json', 'http-cache.tmp', ('url', 'params'))
+# @cache('http-cache.json', 'http-cache.tmp', ('url', 'params'))
 def http_get(session, url, params):
     print(f'Retrieving {url} {params}')
     response = session.get(url, params=params)
@@ -80,7 +49,7 @@ def get_table_contents(table_element):
     return header, row_contents
 
 
-@json_cache('rates-cache.json', 'rates-cache.tmp', ('date', 'issuer', 'card'))
+@cache('rates-cache.pkl', 'rates-cache.tmp', ('date', 'issuer', 'card'))
 def get_rates(session, date, issuer, card):
     assert card in ('MasterCard', 'VISA')
     date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
@@ -98,7 +67,7 @@ def main():
     today = datetime.date.today()
     result_mc = {}
     result_visa = {}
-    for i in range(300):
+    for i in range(3000):
         date = today - datetime.timedelta(days=i)
         date_str = date.strftime('%Y-%m-%d')
         rates_mc = get_rates(session, date_str, issuer='Spar Nord Bank',
@@ -107,12 +76,12 @@ def main():
         print(date, dict(rates_mc)['USD'], dict(rates_visa)['USD'])
         for symbol, rate in rates_mc:
             result_mc.setdefault(symbol, {})[date_str] = str(rate)
-        with open('rates-mc.json', 'w') as fp:
-            json.dump(result_mc, fp, indent=2, sort_keys=True)
         for symbol, rate in rates_visa:
             result_visa.setdefault(symbol, {})[date_str] = str(rate)
-        with open('rates-visa.json', 'w') as fp:
-            json.dump(result_visa, fp, indent=2, sort_keys=True)
+    with open('rates-mc.json', 'w') as fp:
+        json.dump(result_mc, fp, indent=2, sort_keys=True)
+    with open('rates-visa.json', 'w') as fp:
+        json.dump(result_visa, fp, indent=2, sort_keys=True)
 
 
 if __name__ == '__main__':
