@@ -4,7 +4,7 @@ import datetime
 import html5lib
 import requests
 
-from caching import cache
+from caching import rates_cache
 
 
 NS = dict(h='http://www.w3.org/1999/xhtml')
@@ -49,7 +49,7 @@ def get_table_contents(table_element):
     return header, row_contents
 
 
-@cache('rates-cache.pkl', 'rates-cache.tmp', ('date', 'issuer', 'card'))
+@rates_cache
 def get_rates(session, date, issuer, card):
     assert card in ('MasterCard', 'VISA')
     date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')

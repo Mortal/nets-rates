@@ -43,3 +43,7 @@ def cache(cache_filename, tmp_filename, key):
         return wrapped
 
     return decorator
+
+
+rates_cache = cache(
+    'rates-cache.pkl', 'rates-cache.tmp', ('date', 'issuer', 'card'))
