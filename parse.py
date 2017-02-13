@@ -13,7 +13,7 @@ NS = dict(h='http://www.w3.org/1999/xhtml')
 
 # @cache('http-cache.json', 'http-cache.tmp', ('url', 'params'))
 def http_get(session, url, params):
-    print(f'Retrieving {url} {params}')
+    print('Retrieving {url} {params}'.format(url=url, params=params))
     response = session.get(url, params=params)
     try:
         text = response.content.decode('utf8')

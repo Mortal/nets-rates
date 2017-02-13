@@ -27,18 +27,36 @@ def cache(cache_filename, tmp_filename, key):
 
         @functools.wraps(fn)
         def wrapped(*args, **kwargs):
+            return_cache_time = kwargs.pop('cache_time', False)
             bound_args = signature.bind(*args, **kwargs)
             bound_args.apply_defaults()
             cache_key = {k: bound_args.arguments[k] for k in key}
             cache_key_str = json.dumps(cache_key, sort_keys=True)
+            date_key_str = cache_key_str + '_time'
+            date_fmt = '%Y-%m-%d %H:%M:%S.%f'
             try:
-                return cache[cache_key_str]
+                res = cache[cache_key_str]
             except KeyError:
                 cache[cache_key_str] = fn(*args, **kwargs)
                 with open(tmp_filename, 'w' + mode) as fp:
                     module.dump(cache, fp)
                 os.rename(tmp_filename, cache_filename)
-                return cache[cache_key_str]
+                res = cache[cache_key_str]
+                cache_time = datetime.datetime.now()
+                cache[date_key_str] = cache_time.strftime(date_fmt)
+            else:
+                try:
+                    cache_time = datetime.datetime.strptime(
+                        cache[date_key_str], date_fmt)
+                except KeyError:
+                    cache_time = None
+                    if return_cache_time:
+                        print("Warning: No cache time stored for %s" %
+                              cache_key_str)
+            if return_cache_time:
+                return res, cache_time
+            else:
+                return res
 
         return wrapped
 
