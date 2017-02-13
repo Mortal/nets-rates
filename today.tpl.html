@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style type="text/css">
+body {
+	font-family: sans-serif;
+	margin: 40px 5%;
+}
+
+@media screen and (max-width: 400px) {
+	body {
+		margin: 8px;
+	}
+}
+
+h1 {
+	font-size: 100%;
+}
+
+hr {
+	margin: 2em 0;
+	height: 1px;
+	line-height: 1px;
+}
+
+/*
+.expenseform {
+	display: flex;
+	flex-direction: column;
+}
+
+#date {
+	flex-grow: 1;
+}
+
+#amount {
+	height: 40px;
+	box-sizing: border-box;
+	flex-grow: 1;
+}
+.expenserow {
+	display: flex;
+	margin-bottom: 10px;
+}
+.expenserow button {
+	height: 40px;
+	flex-grow: 1;
+}
+
+.measurementform {
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+}
+.measurementform > .counters {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+}
+.measurementform > .counters > .counter {
+	height: 40px;
+	width: 100%;
+}
+.measurementform > .savecounters {
+	margin-left: 10px;
+}
+
+.insert_shopping_list {
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	height: 40px;
+}
+.insert_shopping_list input[type=text] {
+	flex-grow: 1;
+}
+.insert_shopping_list input[type=submit] {
+	text-align: left;
+	flex-grow: 0;
+}
+
+.delete_shopping_list {
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	height: 40px;
+}
+.delete_shopping_list .item {
+	flex-grow: 1;
+	line-height: 40px;
+}
+.delete_shopping_list input[type=submit] {
+	flex-grow: 0;
+	width: 40px;
+	height: 40px;
+}
+*/
+
+footer { color: gray; }
+
+</style>
+
+</head>
+<body>
+
+<h1>Nets price of 100 USD</h1>
+<p>Date: {{ date }}</p>
+<p>MasterCard: <b>{{ mc }}</b> DKK</p>
+<p>VISA: <b>{{ visa }}</b> DKK</p>
+<p>{{ better }}/{{ worse }} =
+<footer>
+<p>Retrieved {{ retrieved }}</p>
+</footer>
+
+</body>
+</html>
