@@ -38,13 +38,12 @@ def cache(cache_filename, tmp_filename, key):
             try:
                 res = cache[cache_key_str]
             except KeyError:
-                cache[cache_key_str] = fn(*args, **kwargs)
+                res = cache[cache_key_str] = fn(*args, **kwargs)
+                cache_time = datetime.datetime.now()
+                cache[date_key_str] = cache_time.strftime(date_fmt)
                 with open(tmp_filename, 'w' + mode) as fp:
                     module.dump(cache, fp)
                 os.rename(tmp_filename, cache_filename)
-                res = cache[cache_key_str]
-                cache_time = datetime.datetime.now()
-                cache[date_key_str] = cache_time.strftime(date_fmt)
             else:
                 try:
                     cache_time = datetime.datetime.strptime(

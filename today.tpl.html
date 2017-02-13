@@ -98,6 +98,10 @@ hr {
 }
 */
 
+table { border-collapse: collapse; }
+td { padding: 16px 8px 0 0; }
+tr:first-child td { padding-top: 0; }
+
 footer { color: gray; }
 
 </style>
@@ -105,11 +109,17 @@ footer { color: gray; }
 </head>
 <body>
 
-<h1>Nets price of 100 USD</h1>
+<h1>Nets/{{ issuer }} price of US$100</h1>
 <p>Date: {{ date }}</p>
-<p>MasterCard: <b>{{ mc }}</b> DKK</p>
-<p>VISA: <b>{{ visa }}</b> DKK</p>
-<p><b>{{ better }}</b>/{{ worse }} = <b>{{ percentage }}%</b></p>
+<p>{{ greatest }}/<b>{{ least }}</b> = <b>{{ percentage }}%</b></p>
+<table>
+<tbody>
+<tr><td>MasterCard:</td>
+<td><b>{{ mc }}</b> DKK</td></tr>
+<tr><td>VISA:</td>
+<td><b>{{ visa }}</b> DKK</td></tr>
+</tbody>
+</table>
 <footer>
 <p>Retrieved {{ retrieved }}</p>
 </footer>
