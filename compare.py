@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import json
 import datetime
 from decimal import Decimal
