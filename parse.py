@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import argparse
 import datetime
 
 import html5lib
@@ -74,11 +75,15 @@ def get_rates(session, date, issuer, card):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--days', '-d', type=int, default=7)
+    args = parser.parse_args()
+
     session = requests.Session()
     today = datetime.date.today()
     result_mc = {}
     result_visa = {}
-    for i in range(3000):
+    for i in range(args.days):
         date = today - datetime.timedelta(days=i)
         date_str = date.strftime('%Y-%m-%d')
         rates_mc = get_rates(session, date_str, issuer='Spar Nord Bank',
