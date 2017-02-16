@@ -11,6 +11,8 @@ DEFAULT_CONFIG = [
     ('currency', 'USD'),
     ('issuer_mc', 'Spar Nord Bank'),
     ('issuer_visa', ''),
+    ('plot_days', None),
+    ('plot_name', None),
 ]
 
 
@@ -37,8 +39,8 @@ def get_config(*keys):
 
 
 def main():
-    currency, issuer_mc, issuer_visa = get_config(
-        'currency, issuer_mc, issuer_visa')
+    currency, issuer_mc, issuer_visa, plot_days, plot_name = get_config(
+        'currency, issuer_mc, issuer_visa, plot_days, plot_name')
     session = requests.Session()
     now = datetime.datetime.now()
     date_str = now.strftime('%Y-%m-%d')
