@@ -3,6 +3,7 @@ import os
 import re
 import datetime
 import requests
+import subprocess
 
 from parse import get_rates, get_url
 
@@ -66,6 +67,17 @@ def main():
     ratio = float(currencies[greatest]) / float(currencies[least])
     percentage = '%.2f' % (100 * ratio)
 
+    if plot_name:
+        plot_py = os.path.join(os.path.dirname(__file__), 'plot.py')
+        plot_path = os.path.join(os.path.dirname(__file__), plot_name)
+        plot_args = (plot_py, '--output', plot_path)
+        if plot_days:
+            plot_args += ('--days', str(plot_days))
+        subprocess.check_call(plot_args)
+        plot_html = '<img src="%s" class="plot" />' % plot_name
+    else:
+        plot_html = ''
+
     data = dict(
         currency=currency,
         issuer=issuer_mc or issuer_visa,
@@ -78,6 +90,7 @@ def main():
         greatest=greatest,
         least=least,
         percentage=percentage,
+        plot=plot_html,
     )
 
     def repl(mo):
