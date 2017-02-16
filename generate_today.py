@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import re
 import datetime
 import requests
@@ -6,25 +7,56 @@ import requests
 from parse import get_rates, get_url
 
 
+DEFAULT_CONFIG = [
+    ('currency', 'USD'),
+    ('issuer_mc', 'Spar Nord Bank'),
+    ('issuer_visa', ''),
+]
+
+
+def get_config(*keys):
+    if len(keys) == 1:
+        keys = keys[0].replace(',', ' ').split()
+    assert set(keys) <= set(k for k, v in DEFAULT_CONFIG)
+    try:
+        import config
+    except ImportError:
+        base = os.path.dirname(__file__)
+        config_path = os.path.join(base, 'config.py')
+        print("Generating %s..." % config_path)
+        with open(config_path, 'x') as fp:
+            for k, v in DEFAULT_CONFIG:
+                fp.write('%s = %r\n' % (k, v))
+        import config
+    missing = [k for k in keys if not hasattr(config, k)]
+    if missing:
+        default_dict = dict(DEFAULT_CONFIG)
+        defaults = ', '.join('%s = %r' % (k, default_dict[k]) for k in missing)
+        raise Exception('config.py should define %s' % defaults)
+    return tuple(getattr(config, k) for k in keys)
+
+
 def main():
+    currency, issuer_mc, issuer_visa = get_config(
+        'currency, issuer_mc, issuer_visa')
     session = requests.Session()
     now = datetime.datetime.now()
     date_str = now.strftime('%Y-%m-%d')
     issuer = 'Spar Nord Bank'
-    rates_mc, t1 = get_rates(session, date_str, issuer=issuer,
+    rates_mc, t1 = get_rates(session, date_str, issuer=issuer_mc,
                              card='MasterCard', cache_time=True)
-    url_mc = get_url(date=now, issuer=issuer, card='MasterCard')
-    rates_visa, t2 = get_rates(session, date_str, issuer='',
+    url_mc = get_url(date=now, issuer=issuer_mc, card='MasterCard')
+    rates_visa, t2 = get_rates(session, date_str, issuer=issuer_visa,
                                card='VISA', cache_time=True)
-    url_visa = get_url(date=now, issuer='', card='VISA')
+    url_visa = get_url(date=now, issuer=issuer_visa, card='VISA')
 
     t = min(t1, t2)
     with open('today.tpl.html') as fp:
         tpl = fp.read()
 
     currencies = {
-        'MasterCard': dict(rates_mc)['USD'],
-        'VISA': dict(rates_visa)['USD'],
+        'MasterCard': dict(rates_mc)[currency],
+        'VISA': dict(rates_visa)[currency],
     }
 
     greatest = max(currencies, key=currencies.__getitem__)
@@ -33,8 +65,8 @@ def main():
     percentage = '%.2f' % (100 * ratio)
 
     data = dict(
-        currency='USD',
-        issuer=issuer,
+        currency=currency,
+        issuer=issuer_mc or issuer_visa,
         date=date_str,
         mc=currencies['MasterCard'],
         visa=currencies['VISA'],
