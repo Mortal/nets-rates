@@ -3,7 +3,7 @@ import re
 import datetime
 import requests
 
-from parse import get_rates
+from parse import get_rates, get_url
 
 
 def main():
@@ -13,8 +13,11 @@ def main():
     issuer = 'Spar Nord Bank'
     rates_mc, t1 = get_rates(session, date_str, issuer=issuer,
                              card='MasterCard', cache_time=True)
+    url_mc = get_url(date=now, issuer=issuer, card='MasterCard')
     rates_visa, t2 = get_rates(session, date_str, issuer='',
                                card='VISA', cache_time=True)
+    url_visa = get_url(date=now, issuer='', card='VISA')
+
     t = min(t1, t2)
     with open('today.tpl.html') as fp:
         tpl = fp.read()
@@ -34,6 +37,8 @@ def main():
         date=date_str,
         mc=currencies['MasterCard'],
         visa=currencies['VISA'],
+        url_mc=url_mc,
+        url_visa=url_visa,
         retrieved=t.strftime('%Y-%m-%d %H:%M:%S'),
         greatest=greatest,
         least=least,
