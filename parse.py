@@ -33,10 +33,20 @@ def parse_cached(session, url, params):
                               transport_encoding=result['encoding'])
 
 
-def get_doc(session, date, issuer, card):
+def get_url_data(date, issuer, card):
     base = 'https://miscweb.nets.eu/exchangerates/getRates'
     params = dict(newDate=date.strftime('%m/%d/%Y'), issuerInstId='',
                   language='en', cardOrg=card, issuer=issuer)
+    return base, params
+
+
+def get_url(date, issuer, card):
+    base, params = get_url_data(date, issuer, card)
+    return '%s?%s#ratesTable' % (base, requests.compat.urlencode(params))
+
+
+def get_doc(session, date, issuer, card):
+    base, params = get_url_data(date, issuer, card)
     return parse_cached(session, base, params)
 
 
