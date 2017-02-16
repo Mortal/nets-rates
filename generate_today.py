@@ -33,6 +33,7 @@ def main():
     percentage = '%.2f' % (100 * ratio)
 
     data = dict(
+        currency='USD',
         issuer=issuer,
         date=date_str,
         mc=currencies['MasterCard'],
