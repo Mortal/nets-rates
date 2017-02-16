@@ -43,7 +43,7 @@ def main():
     def repl(mo):
         return str(data[mo.group(1)])
 
-    output = re.sub(r'\{\{ ([a-z]+) \}\}', repl, tpl)
+    output = re.sub(r'\{\{ ([a-z_]+) \}\}', repl, tpl)
 
     with open('today.html', 'w') as fp:
         fp.write(output)
