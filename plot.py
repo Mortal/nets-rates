@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-import json
+import argparse
 import datetime
 from decimal import Decimal
 
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-
 from caching import rates_cache
+from generate_today import get_config
 
 
 @rates_cache
@@ -26,30 +24,76 @@ def get_latest_date(date, issuers, cards):
             return date
 
 
-def past_rates_from(date, issuer, card):
+def past_rates_from(date, issuer, card, days=float('inf')):
     date = get_latest_date(date, [issuer], [card])
-    while True:
+    i = 0
+    while i < days:
+        i += 1
         yield date, get_rates(date.strftime('%Y-%m-%d'), issuer, card)
         date -= datetime.timedelta(days=1)
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--output', '-o')
+    parser.add_argument('--days', '-d', type=int, default=float('inf'))
+    args = parser.parse_args()
+
+    if args.output:
+        import matplotlib
+        matplotlib.use('Agg')
+
+    currency, issuer_mc, issuer_visa = get_config(
+        'currency, issuer_mc, issuer_visa')
+
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
+
     today = datetime.date.today()
     input = {
-        'MasterCard': past_rates_from(today, 'Spar Nord Bank', 'MasterCard'),
-        'VISA': past_rates_from(today, '', 'VISA'),
+        'MasterCard': past_rates_from(today, issuer_mc, 'MasterCard',
+                                      args.days),
+        'VISA': past_rates_from(today, issuer_visa, 'VISA', args.days),
     }
-    symbol = 'USD'
+    days = 0
     for source, all_data in input.items():
         xs, ys = [], []
         for date, rates in all_data:
-            rate = next(r for s, r in rates if s == symbol)
+            rate = next(r for s, r in rates if s == currency)
             xs.append(date)
             ys.append(Decimal(rate))
+        days = max(days, len(xs))
         plt.plot(xs, ys, label=source)
     plt.legend(loc='upper left')
-    plt.gca().format_xdata = lambda d: mdates.num2date(d).strftime('%Y-%m-%d')
-    plt.show()
+
+    if days > 1000:
+        major = mdates.YearLocator()
+        minor = mdates.MonthLocator()
+        label = mdates.DateFormatter('%Y')
+    elif days > 365:
+        major = mdates.MonthLocator()
+        minor = mdates.DayLocator()
+        label = mdates.DateFormatter('%b %Y')
+    elif days > 30:
+        major = mdates.MonthLocator()
+        minor = mdates.DayLocator()
+        label = mdates.DateFormatter('%b %e')
+    else:
+        major = minor = mdates.DayLocator()
+        label = mdates.DateFormatter('%b %e')
+
+    plt.gca().xaxis.set_major_locator(major)
+    plt.gca().xaxis.set_minor_locator(minor)
+    plt.gca().xaxis.set_major_formatter(label)
+    plt.grid()
+
+    if args.output:
+        plt.savefig(args.output)
+    else:
+        # Change format of data in status bar on mouseover
+        plt.gca().format_xdata = (
+            lambda d: mdates.num2date(d).strftime('%Y-%m-%d'))
+        plt.show()
 
 
 if __name__ == '__main__':
