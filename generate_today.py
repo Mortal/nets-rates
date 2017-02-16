@@ -68,8 +68,9 @@ def main():
     percentage = '%.2f' % (100 * ratio)
 
     if plot_name:
-        plot_py = os.path.join(os.path.dirname(__file__), 'plot.py')
-        plot_path = os.path.join(os.path.dirname(__file__), plot_name)
+        base = os.path.abspath(os.path.dirname(__file__))
+        plot_py = os.path.join(base, 'plot.py')
+        plot_path = os.path.join(base, plot_name)
         plot_args = (plot_py, '--output', plot_path)
         if plot_days:
             plot_args += ('--days', str(plot_days))
