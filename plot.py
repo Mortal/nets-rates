@@ -33,13 +33,13 @@ def past_rates_from(date, issuer, card, days=float('inf')):
         date -= datetime.timedelta(days=1)
 
 
-def get_data(date):
+def get_data(date, days):
     currency, issuer_mc, issuer_visa = get_config(
         'currency, issuer_mc, issuer_visa')
     input = {
         'MasterCard': past_rates_from(date, issuer_mc, 'MasterCard',
-                                      args.days),
-        'VISA': past_rates_from(date, issuer_visa, 'VISA', args.days),
+                                      days),
+        'VISA': past_rates_from(date, issuer_visa, 'VISA', days),
     }
     for source, all_data in input.items():
         xs, ys = [], []
@@ -66,7 +66,7 @@ def main():
     today = datetime.date.today()
 
     days = 0
-    for xs, ys, source in get_data(today):
+    for xs, ys, source in get_data(today, args.days):
         days = max(days, len(xs))
         plt.plot(xs, ys, label=source)
     plt.legend(loc='upper left')
