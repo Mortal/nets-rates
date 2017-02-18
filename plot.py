@@ -41,7 +41,7 @@ def get_data(date, days):
                                       days),
         'VISA': past_rates_from(date, issuer_visa, 'VISA', days),
     }
-    for source, all_data in input.items():
+    for source, all_data in sorted(input.items()):
         xs, ys = [], []
         for date, rates in all_data:
             rate = next(r for s, r in rates if s == currency)
