@@ -33,6 +33,23 @@ def past_rates_from(date, issuer, card, days=float('inf')):
         date -= datetime.timedelta(days=1)
 
 
+def get_data(date):
+    currency, issuer_mc, issuer_visa = get_config(
+        'currency, issuer_mc, issuer_visa')
+    input = {
+        'MasterCard': past_rates_from(date, issuer_mc, 'MasterCard',
+                                      args.days),
+        'VISA': past_rates_from(date, issuer_visa, 'VISA', args.days),
+    }
+    for source, all_data in input.items():
+        xs, ys = [], []
+        for date, rates in all_data:
+            rate = next(r for s, r in rates if s == currency)
+            xs.append(date)
+            ys.append(Decimal(rate))
+        yield xs, ys, source
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', '-o')
@@ -43,25 +60,13 @@ def main():
         import matplotlib
         matplotlib.use('Agg')
 
-    currency, issuer_mc, issuer_visa = get_config(
-        'currency, issuer_mc, issuer_visa')
-
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
 
     today = datetime.date.today()
-    input = {
-        'MasterCard': past_rates_from(today, issuer_mc, 'MasterCard',
-                                      args.days),
-        'VISA': past_rates_from(today, issuer_visa, 'VISA', args.days),
-    }
+
     days = 0
-    for source, all_data in input.items():
-        xs, ys = [], []
-        for date, rates in all_data:
-            rate = next(r for s, r in rates if s == currency)
-            xs.append(date)
-            ys.append(Decimal(rate))
+    for xs, ys, source in get_data(today):
         days = max(days, len(xs))
         plt.plot(xs, ys, label=source)
     plt.legend(loc='upper left')
