@@ -58,6 +58,8 @@ def cache(cache_filename, tmp_filename, key):
             else:
                 return res
 
+        def recompute(*args, **kwargs):
+
         return wrapped
 
     return decorator
