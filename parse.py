@@ -77,12 +77,21 @@ def get_rates(session, date, issuer, card):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--days', '-d', type=int, default=7)
+    parser.add_argument('--recompute', '-r', type=int, default=0)
     args = parser.parse_args()
 
     session = requests.Session()
     today = datetime.date.today()
     result_mc = {}
     result_visa = {}
+    for i in range(args.recompute):
+        date = today - datetime.timedelta(days=i)
+        date_str = date.strftime('%Y-%m-%d')
+        t1 = get_rates.delete(
+            session, date_str, issuer='Spar Nord Bank',
+            card='MasterCard')
+        t2 = get_rates.delete(session, date_str, issuer='', card='VISA')
+        print(t1, t2)
     for i in range(args.days):
         date = today - datetime.timedelta(days=i)
         date_str = date.strftime('%Y-%m-%d')

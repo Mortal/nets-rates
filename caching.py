@@ -26,13 +26,17 @@ def cache(cache_filename, tmp_filename, key):
     def decorator(fn):
         signature = inspect.signature(fn)
 
-        @functools.wraps(fn)
-        def wrapped(*args, **kwargs):
+        def parse(args, kwargs):
             return_cache_time = kwargs.pop('cache_time', False)
             bound_args = signature.bind(*args, **kwargs)
             bound_args.apply_defaults()
             cache_key = {k: bound_args.arguments[k] for k in key}
             cache_key_str = json.dumps(cache_key, sort_keys=True)
+            return cache_key_str, return_cache_time
+
+        @functools.wraps(fn)
+        def wrapped(*args, **kwargs):
+            cache_key_str, return_cache_time = parse(args, kwargs)
             date_key_str = cache_key_str + '_time'
             date_fmt = '%Y-%m-%d %H:%M:%S.%f'
             try:
@@ -58,7 +62,13 @@ def cache(cache_filename, tmp_filename, key):
             else:
                 return res
 
-        def recompute(*args, **kwargs):
+        def delete(*args, **kwargs):
+            cache_key_str, return_cache_time = parse(args, kwargs)
+            t = cache.pop(cache_key_str + '_time', None)
+            del cache[cache_key_str]
+            return t
+
+        wrapped.delete = delete
 
         return wrapped
 
