@@ -25,6 +25,7 @@ def cache(cache_filename, tmp_filename, key):
 
     def decorator(fn):
         signature = inspect.signature(fn)
+        date_fmt = '%Y-%m-%d %H:%M:%S.%f'
 
         def parse(args, kwargs):
             return_cache_time = kwargs.pop('cache_time', False)
@@ -38,7 +39,6 @@ def cache(cache_filename, tmp_filename, key):
         def wrapped(*args, **kwargs):
             cache_key_str, return_cache_time = parse(args, kwargs)
             date_key_str = cache_key_str + '_time'
-            date_fmt = '%Y-%m-%d %H:%M:%S.%f'
             try:
                 res = cache[cache_key_str]
             except KeyError:
@@ -67,7 +67,7 @@ def cache(cache_filename, tmp_filename, key):
             del cache[cache_key_str]
             try:
                 return datetime.datetime.strptime(
-                    cache.pop(cache_key_str + '_time'))
+                    cache.pop(cache_key_str + '_time'), date_fmt)
             except KeyError:
                 pass
 
