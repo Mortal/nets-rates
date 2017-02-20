@@ -64,9 +64,12 @@ def cache(cache_filename, tmp_filename, key):
 
         def delete(*args, **kwargs):
             cache_key_str, return_cache_time = parse(args, kwargs)
-            t = cache.pop(cache_key_str + '_time', None)
             del cache[cache_key_str]
-            return t
+            try:
+                return datetime.datetime.strptime(
+                    cache.pop(cache_key_str + '_time'))
+            except KeyError:
+                pass
 
         wrapped.delete = delete
 
