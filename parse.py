@@ -119,6 +119,8 @@ def main():
             card='MasterCard')
         t2 = get_rates.delete(session, date_str, issuer='', card='VISA')
         print(t1, t2)
+    if args.recompute:
+        get_rates.save()
     for i in range(args.days):
         date = today - datetime.timedelta(days=i)
         date_str = date.strftime('%Y-%m-%d')
