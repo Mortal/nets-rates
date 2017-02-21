@@ -49,9 +49,13 @@ def main():
     rates_mc, t1 = get_rates(session, date_str, issuer=issuer_mc,
                              card='MasterCard', cache_time=True)
     url_mc = get_url(date=now, issuer=issuer_mc, card='MasterCard')
-    rates_visa, t2 = get_rates(session, date_str, issuer=issuer_visa,
-                               card='VISA', cache_time=True,
-                               validate_today=True)
+    try:
+        rates_visa, t2 = get_rates(session, date_str, issuer=issuer_visa,
+                                   card='VISA', cache_time=True,
+                                   validate_today=True)
+    except ValueError as exn:
+        print(exn)
+        return
     url_visa = get_url(date=now, issuer=issuer_visa, card='VISA')
 
     t = min(t1, t2)
