@@ -77,7 +77,7 @@ def previous_weekday(date):
 def previous_weekday_str(date_str):
     date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
     res = previous_weekday(date)
-    return date.strftime('%Y-%m-%d')
+    return res.strftime('%Y-%m-%d')
 
 
 @rates_cache
