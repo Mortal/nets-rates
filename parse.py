@@ -95,9 +95,6 @@ def get_rates(session, date, issuer, card, validate_today=False):
         prev_rates = get_rates(session, prev, issuer, card)
         if prev_rates == rates:
             raise ValueError("No exchange rates for %s yet" % (date,))
-        from pprint import pprint
-        pprint([(r1, r2) for r1, r2 in zip(prev_rates, rates)
-                if r1 != r2])
     return rates
 
 
