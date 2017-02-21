@@ -61,8 +61,27 @@ def get_table_contents(table_element):
     return header, row_contents
 
 
+def previous_weekday(date):
+    MON, TUE, WED, THU, FRI, SAT, SUN = range(7)
+    wd = date.weekday()
+    if wd in (MON, SAT, SUN):
+        subtract = (wd - FRI) % 7
+    else:
+        subtract = 1
+    res = date - datetime.timedelta(days=subtract)
+    assert MON <= res.weekday() <= FRI
+    assert 1 <= (date - res).days <= 3
+    return res
+
+
+def previous_weekday_str(date_str):
+    date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+    res = previous_weekday(date)
+    return date.strftime('%Y-%m-%d')
+
+
 @rates_cache
-def get_rates(session, date, issuer, card):
+def get_rates(session, date, issuer, card, validate_today=False):
     assert card in ('MasterCard', 'VISA')
     date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
     doc = get_doc(session, date_obj, issuer=issuer, card=card)
@@ -71,6 +90,14 @@ def get_rates(session, date, issuer, card):
     currency = header.index('Currency')
     rate = header.index('Exchange rate')
     rates = [(row[currency], row[rate]) for row in rows]
+    if validate_today:
+        prev = previous_weekday_str(date)
+        prev_rates = get_rates(session, prev, issuer, card)
+        if prev_rates == rates:
+            raise ValueError("No exchange rates for %s yet" % (date,))
+        from pprint import pprint
+        pprint([(r1, r2) for r1, r2 in zip(prev_rates, rates)
+                if r1 != r2])
     return rates
 
 
@@ -97,7 +124,8 @@ def main():
         date_str = date.strftime('%Y-%m-%d')
         rates_mc = get_rates(session, date_str, issuer='Spar Nord Bank',
                              card='MasterCard')
-        rates_visa = get_rates(session, date_str, issuer='', card='VISA')
+        rates_visa = get_rates(session, date_str, issuer='',
+                               card='VISA', validate_today=(i == 0))
         print(date, dict(rates_mc)['USD'], dict(rates_visa)['USD'])
         for symbol, rate in rates_mc:
             result_mc.setdefault(symbol, {})[date_str] = str(rate)
