@@ -46,16 +46,17 @@ def main():
     now = datetime.datetime.now()
     date_str = now.strftime('%Y-%m-%d')
     issuer = 'Spar Nord Bank'
-    rates_mc, t1 = get_rates(session, date_str, issuer=issuer_mc,
-                             card='MasterCard', cache_time=True)
-    url_mc = get_url(date=now, issuer=issuer_mc, card='MasterCard')
     try:
+        rates_mc, t1 = get_rates(session, date_str, issuer=issuer_mc,
+                                 card='MasterCard', cache_time=True,
+                                 validate_today=True)
         rates_visa, t2 = get_rates(session, date_str, issuer=issuer_visa,
                                    card='VISA', cache_time=True,
                                    validate_today=True)
     except ValueError as exn:
         print(exn)
         return
+    url_mc = get_url(date=now, issuer=issuer_mc, card='MasterCard')
     url_visa = get_url(date=now, issuer=issuer_visa, card='VISA')
 
     t = min(t1, t2)
