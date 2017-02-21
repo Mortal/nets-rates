@@ -45,9 +45,7 @@ def cache(cache_filename, tmp_filename, key):
                 res = cache[cache_key_str] = fn(*args, **kwargs)
                 cache_time = datetime.datetime.now()
                 cache[date_key_str] = cache_time.strftime(date_fmt)
-                with open(tmp_filename, 'w' + mode) as fp:
-                    module.dump(cache, fp)
-                os.rename(tmp_filename, cache_filename)
+                save()
             else:
                 try:
                     cache_time = datetime.datetime.strptime(
@@ -71,7 +69,14 @@ def cache(cache_filename, tmp_filename, key):
             except KeyError:
                 pass
 
+        def save():
+            print("Saving %s" % cache_filename)
+            with open(tmp_filename, 'w' + mode) as fp:
+                module.dump(cache, fp)
+            os.rename(tmp_filename, cache_filename)
+
         wrapped.delete = delete
+        wrapped.save = save
 
         return wrapped
 
