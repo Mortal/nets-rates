@@ -50,7 +50,8 @@ def main():
                              card='MasterCard', cache_time=True)
     url_mc = get_url(date=now, issuer=issuer_mc, card='MasterCard')
     rates_visa, t2 = get_rates(session, date_str, issuer=issuer_visa,
-                               card='VISA', cache_time=True)
+                               card='VISA', cache_time=True,
+                               validate_today=True)
     url_visa = get_url(date=now, issuer=issuer_visa, card='VISA')
 
     t = min(t1, t2)
