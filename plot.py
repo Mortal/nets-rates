@@ -54,6 +54,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', '-o')
     parser.add_argument('--days', '-d', type=int, default=float('inf'))
+    parser.add_argument('--diff', action='store_true')
     args = parser.parse_args()
 
     if args.output:
@@ -66,10 +67,18 @@ def main():
     today = datetime.date.today()
 
     days = 0
-    for xs, ys, source in get_data(today, args.days):
+    data = list(get_data(today, args.days))
+    for xs, ys, source in data:
         days = max(days, len(xs))
         plt.plot(xs, ys, label=source)
     plt.legend(loc='upper left')
+    if args.diff:
+        ax2 = plt.twinx()
+        (xs1, ys1, k1), (xs2, ys2, k2) = data
+        xs = sorted(set(xs1) & set(xs2))
+        xy1 = dict(zip(xs1, ys1))
+        xy2 = dict(zip(xs2, ys2))
+        ax2.plot(xs, [xy1[x] - xy2[x] for x in xs], 'r', label='diff')
 
     if days > 1000:
         major = mdates.YearLocator()
