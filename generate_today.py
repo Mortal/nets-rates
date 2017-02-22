@@ -59,7 +59,7 @@ def main():
     url_mc = get_url(date=now, issuer=issuer_mc, card='MasterCard')
     url_visa = get_url(date=now, issuer=issuer_visa, card='VISA')
 
-    t = min(t1, t2)
+    t = max(t1, t2)
     with open('today.tpl.html') as fp:
         tpl = fp.read()
 
