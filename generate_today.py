@@ -6,6 +6,7 @@ import requests
 import subprocess
 
 from parse import get_rates, get_url
+from caching import rates_cache
 
 
 DEFAULT_CONFIG = [
@@ -39,6 +40,20 @@ def get_config(*keys):
     return tuple(getattr(config, k) for k in keys)
 
 
+def get_latest_date(max_date=None, issuers=None, cards=None):
+    latest = {}
+    for date_str, issuer, card in rates_cache.keys():
+        date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+        use = all((
+            max_date is None or date <= max_date,
+            issuers is None or issuer in issuers,
+            cards is None or card in cards,
+        ))
+        if use:
+            latest[card] = max(date, latest.get(card, date))
+    return min(latest.values())
+
+
 def main():
     currency, issuer_mc, issuer_visa, plot_days, plot_name = get_config(
         'currency, issuer_mc, issuer_visa, plot_days, plot_name')
@@ -55,7 +70,15 @@ def main():
                                    validate_today=True)
     except ValueError as exn:
         print(exn)
-        return
+        now = get_latest_date()
+        date_str = now.strftime('%Y-%m-%d')
+        print('Using date %s' % (now,))
+        rates_mc, t1 = get_rates(session, date_str, issuer=issuer_mc,
+                                 card='MasterCard', cache_time=True,
+                                 validate_today=False)
+        rates_visa, t2 = get_rates(session, date_str, issuer=issuer_visa,
+                                   card='VISA', cache_time=True,
+                                   validate_today=False)
     url_mc = get_url(date=now, issuer=issuer_mc, card='MasterCard')
     url_visa = get_url(date=now, issuer=issuer_visa, card='VISA')
 
