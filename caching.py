@@ -109,3 +109,10 @@ def cache(cache_filename, tmp_filename, key):
 
 rates_cache = cache(
     'rates-cache.pkl', 'rates-cache.tmp', ('date', 'issuer', 'card'))
+
+
+if __name__ == "__main__":
+    latest = {}
+    for date, issuer, card in rates_cache.keys():
+        latest[card] = max(date, latest.get(card, date))
+    print(latest)
