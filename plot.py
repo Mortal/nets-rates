@@ -4,24 +4,12 @@ import datetime
 from decimal import Decimal
 
 from caching import rates_cache
-from generate_today import get_config
+from generate_today import get_config, get_latest_date
 
 
 @rates_cache
 def get_rates(date, issuer, card, session=None):
     raise StopIteration
-
-
-def get_latest_date(date, issuers, cards):
-    for _ in range(100):
-        try:
-            for i, c in zip(issuers, cards):
-                get_rates(date.strftime('%Y-%m-%d'), i, c)
-        except StopIteration:
-            date -= datetime.timedelta(days=1)
-            continue
-        else:
-            return date
 
 
 def past_rates_from(date, issuer, card, days=float('inf')):
