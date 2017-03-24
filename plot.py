@@ -9,7 +9,7 @@ from generate_today import get_config, get_latest_date
 
 @rates_cache
 def get_rates(date, issuer, card, session=None):
-    raise StopIteration
+    raise ValueError('No data')
 
 
 def past_rates_from(date, issuer, card, days=float('inf')):
@@ -17,7 +17,13 @@ def past_rates_from(date, issuer, card, days=float('inf')):
     i = 0
     while i < days:
         i += 1
-        yield date, get_rates(date.strftime('%Y-%m-%d'), issuer, card)
+        try:
+            data = get_rates(date.strftime('%Y-%m-%d'), issuer, card)
+        except ValueError:
+            if not (days < float('inf')):
+                break
+        else:
+            yield date, data
         date -= datetime.timedelta(days=1)
 
 
@@ -32,9 +38,10 @@ def get_data(date, days):
     for source, all_data in sorted(input.items()):
         xs, ys = [], []
         for date, rates in all_data:
-            rate = next(r for s, r in rates if s == currency)
+            rate = (None if rates is None else
+                    next(Decimal(r) for s, r in rates if s == currency))
             xs.append(date)
-            ys.append(Decimal(rate))
+            ys.append(rate)
         yield xs, ys, source
 
 
